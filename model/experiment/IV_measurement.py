@@ -1,7 +1,9 @@
 import time
+import os
 import numpy as np
 import yaml
 from model.daq.analog_daq import AnalogDaq
+from model.daq.dummy_daq import DummyDaq
 
 from model import ur
 
@@ -17,7 +19,13 @@ class IVExperiment:
     def load_daq(self):
         port = self.params['Params']['port']
         resistance = ur(self.params['Params']['resistance'])
-        self.daq = AnalogDaq(port, resistance)
+        if self.params['Params']['device_type'] == 'real':
+            self.daq = AnalogDaq(port, resistance)
+        elif self.params['Params']['device_type'] == 'dummy':
+            self.daq = DummyDaq(port, resistance)
+        else:
+            raise Exception('Daq device not recognized')
+
 
     def do_scan(self):
         if self.scan_running:
@@ -47,7 +55,23 @@ class IVExperiment:
     def plot_data(self):
         pass
 
-    def save_data(self, filename):
+    def save_data(self, filename=None):
+        if not hasattr(self, 'currents'):
+            print('Still no currents acquired')
+            return
+
+        fname = self.params['Saving']['filename']
+        if not isinstance(filename, str):
+            if not os.path.isdir(self.params['Saving']['path']):
+                os.makedirs(self.params['Saving']['path'])
+                print('no such directory')
+            i = 0
+            while os.path.exists(os.path.join(self.params['Saving']['path'],fname)):
+                fname = self.params['Saving']['filename']+str(i)
+                i = i+1
+
+            filename = os.path.join(self.params['Saving']['path'], fname)
+        print(filename)
         np.savetxt(filename, self.currents)
 
     def save_plot(self, filename):

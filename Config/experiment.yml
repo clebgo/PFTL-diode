@@ -3,7 +3,8 @@ User:
 
 Params:
   resistance: 100ohm
-  port: /dev/ttyACM0  # COM3  COM5....
+  port: /dev/cu.usbmodem14101
+  device_type: dummy #(real or dummy)
 
 Scan:
   start: 0V
@@ -12,4 +13,9 @@ Scan:
   delay: 50ms
   channel_in: 0
   channel_out: 0
+
+Saving:
+  filename: IV_data
+  path: /Users/Flo/data
+
 
